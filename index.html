@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign-in</title>
+
+    <script src="javascript/sign_in.js"></script>
+    <style>
+
+        .sign_in_bg{
+
+            border-style: outset;
+            border-width: 0.5vw;
+
+            margin: auto;
+            width: 60vw;
+            height: calc(60vh + 50px);
+
+            margin-top: 20vh;
+
+            background-color: rgb(192, 192, 192);
+
+        }
+        
+        .input_holder
+        {
+
+            margin: auto;
+            margin-left: 5vw;
+
+            margin-top: 10vh;
+
+        }
+
+        .text_edit{
+
+            background-color: rgb(255, 255, 255);
+
+            font-size: 4vh;
+
+            display: block;
+            overflow: hidden;
+            white-space: nowrap;
+
+            width: calc(40vw);
+            height: calc(5vh);
+
+            overscroll-behavior: contain;
+
+        }
+
+        .button_holder
+        {
+
+            float: right;
+
+        }
+
+        .button
+        {
+
+            font-size: 1.5vmin;
+            float: right;
+            margin-left: 2vw;
+            margin-right: 5vw;
+            width: 5vw;
+            height: 3vh;
+        }
+
+        #error_div
+        {
+            
+            color: red;
+            position: absolute;
+            margin-top: 2vw;
+            margin-left: 20vw;
+            margin-right: auto;
+            
+        }
+
+    </style>
+    <style>
+
+        body {
+
+            word-break: break-all;
+
+            text-wrap: nowrap;
+
+            background-color: rgb(192, 192, 192);
+
+            font-family: 'Courier New', monospace;
+
+        }   
+
+
+    </style>
+</head>
+<body>
+    <div class="error" id="error_div">create_new_user_or_sign_in</div>
+    <form action="./db/handler.php" method="GET" class="sign_in_bg">
+
+        <input type="hidden" name="request_type" value="signin" />
+
+        <div class="input_holder">
+
+            username
+            <input type="text" name="username" maxlength="12" class="text_edit" id="username_box">
+
+        </div>
+        <div class="input_holder">
+
+            password
+            <input type="password" name="password" maxlength="12" class="text_edit" id="password_box">
+
+        </div>
+        <div class="input_holder">
+
+            confirm password
+            <input type="password" name="password_confirm" maxlength="12" class="text_edit" id="password_confirm_box">
+
+        </div>
+
+
+
+        <div id="button_holder">
+
+            <div>
+
+                <input type="submit" class="button" id="submit_button">
+
+            </div> 
+
+        </div>
+
+    </div>
+</body>
+<script>
+
+    document.getElementById("error_div").innerHTML = parse_query_string()["error_message"];
+
+    function parse_query_string()
+    {
+
+    var params = location.href.split('?')[1].split('&');
+    var data = {};
+    for (x in params)
+    {
+        data[params[x].split('=')[0]] = params[x].split('=')[1];
+    }
+
+    return data
+    }
+
+</script>
+</html>
