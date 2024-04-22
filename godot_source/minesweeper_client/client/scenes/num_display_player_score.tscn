@@ -1,0 +1,37 @@
+[gd_scene load_steps=8 format=3 uid="uid://byx0gf4ultshe"]
+
+[ext_resource type="Texture2D" uid="uid://dxjjqemmq8kdc" path="res://client/textures/final/number_display/num_display_bg.png" id="1_kano8"]
+[ext_resource type="Script" path="res://client/scripts/num_display_player_score_bg.gd" id="2_jyda3"]
+[ext_resource type="Texture2D" uid="uid://dh7akchudk38t" path="res://client/textures/final/number_display/num_zero.png" id="3_o8s7u"]
+[ext_resource type="Script" path="res://client/scripts/num_display_1.gd" id="4_bxf21"]
+[ext_resource type="Script" path="res://client/scripts/num_display_2.gd" id="5_2rlxu"]
+[ext_resource type="Script" path="res://client/scripts/num_display_3.gd" id="6_2iiqc"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_4amel"]
+outline_size = 3
+outline_color = Color(0, 1, 0, 1)
+
+[node name="num_display_player_score_bg" type="Sprite2D"]
+position = Vector2(283, 214)
+texture = ExtResource("1_kano8")
+script = ExtResource("2_jyda3")
+
+[node name="num_display_1" type="Sprite2D" parent="."]
+texture = ExtResource("3_o8s7u")
+script = ExtResource("4_bxf21")
+
+[node name="num_display_2" type="Sprite2D" parent="."]
+texture = ExtResource("3_o8s7u")
+script = ExtResource("5_2rlxu")
+
+[node name="num_display_3" type="Sprite2D" parent="."]
+texture = ExtResource("3_o8s7u")
+script = ExtResource("6_2iiqc")
+
+[node name="Label" type="Label" parent="."]
+offset_left = -70.0
+offset_top = -64.0
+offset_right = 70.0
+offset_bottom = -40.0
+text = "My Score"
+label_settings = SubResource("LabelSettings_4amel")

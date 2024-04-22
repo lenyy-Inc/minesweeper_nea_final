@@ -1,0 +1,56 @@
+[gd_scene load_steps=7 format=3 uid="uid://yxjvrnkbfaoi"]
+
+[ext_resource type="Texture2D" uid="uid://cgb4c2kwf5o83" path="res://client/textures/beta/board/spritesheet_board.png" id="1_hr13e"]
+[ext_resource type="Texture2D" uid="uid://dokiqqoj4y3fx" path="res://client/textures/final/board/spritesheet_board.png" id="2_7asmc"]
+[ext_resource type="Script" path="res://client/scripts/minesweeper_tiled_board.gd" id="2_30j0h"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_v0j88"]
+texture = ExtResource("1_hr13e")
+texture_region_size = Vector2i(64, 64)
+0:0/0 = 0
+1:0/0 = 0
+2:0/0 = 0
+3:0/0 = 0
+0:1/0 = 0
+1:1/0 = 0
+2:1/0 = 0
+3:1/0 = 0
+0:2/0 = 0
+1:2/0 = 0
+2:2/0 = 0
+3:2/0 = 0
+0:3/0 = 0
+1:3/0 = 0
+2:3/0 = 0
+3:3/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_7bbqw"]
+texture = ExtResource("2_7asmc")
+texture_region_size = Vector2i(64, 64)
+0:0/0 = 0
+1:0/0 = 0
+2:0/0 = 0
+3:0/0 = 0
+0:1/0 = 0
+1:1/0 = 0
+2:1/0 = 0
+3:1/0 = 0
+0:2/0 = 0
+1:2/0 = 0
+2:2/0 = 0
+3:2/0 = 0
+0:3/0 = 0
+1:3/0 = 0
+2:3/0 = 0
+3:3/0 = 0
+
+[sub_resource type="TileSet" id="TileSet_rjqiq"]
+tile_size = Vector2i(64, 64)
+sources/0 = SubResource("TileSetAtlasSource_v0j88")
+sources/1 = SubResource("TileSetAtlasSource_7bbqw")
+
+[node name="board" type="TileMap"]
+tile_set = SubResource("TileSet_rjqiq")
+format = 2
+layer_0/name = "board"
+script = ExtResource("2_30j0h")

@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3 uid="uid://btpecljy1vxdx"]
+
+[ext_resource type="Script" path="res://client/scripts/client.gd" id="1_iieum"]
+[ext_resource type="Script" path="res://client/scripts/loadingtext.gd" id="2_csev5"]
+
+[node name="client" type="Node"]
+process_mode = 1
+script = ExtResource("1_iieum")
+
+[node name="textbox" type="Label" parent="."]
+offset_right = 40.0
+offset_bottom = 23.0
+text = "failed to start"
+horizontal_alignment = 1
+vertical_alignment = 1
+script = ExtResource("2_csev5")

@@ -1,0 +1,74 @@
+[gd_scene load_steps=9 format=3 uid="uid://bapiqrg6dx6rh"]
+
+[ext_resource type="Texture2D" uid="uid://tr78qfsse385" path="res://client/textures/beta/grid/spritesheet_grid.png" id="1_dptyw"]
+[ext_resource type="Texture2D" uid="uid://ddiq8g1mrel0t" path="res://client/textures/alpha/spritesheet.png" id="1_hdc52"]
+[ext_resource type="Script" path="res://client/scripts/minesweeper_grid.gd" id="3_7v0u1"]
+[ext_resource type="Texture2D" uid="uid://lqxme32nrjne" path="res://client/textures/final/grid/spritesheet_grid.png" id="3_h00uy"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_qb75w"]
+texture = ExtResource("1_dptyw")
+texture_region_size = Vector2i(64, 64)
+0:0/0 = 0
+1:0/0 = 0
+2:0/0 = 0
+3:0/0 = 0
+4:0/0 = 0
+5:0/0 = 0
+0:1/0 = 0
+1:1/0 = 0
+2:1/0 = 0
+3:1/0 = 0
+4:1/0 = 0
+5:1/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_oqjvu"]
+texture = ExtResource("1_hdc52")
+texture_region_size = Vector2i(64, 64)
+0:0/0 = 0
+1:0/0 = 0
+2:0/0 = 0
+3:0/0 = 0
+4:0/0 = 0
+5:0/0 = 0
+0:1/0 = 0
+1:1/0 = 0
+2:1/0 = 0
+3:1/0 = 0
+4:1/0 = 0
+5:1/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_h4n4s"]
+texture = ExtResource("3_h00uy")
+texture_region_size = Vector2i(64, 64)
+0:0/0 = 0
+1:0/0 = 0
+2:0/0 = 0
+3:0/0 = 0
+4:0/0 = 0
+5:0/0 = 0
+0:1/0 = 0
+1:1/0 = 0
+2:1/0 = 0
+3:1/0 = 0
+4:1/0 = 0
+5:1/0 = 0
+
+[sub_resource type="TileSet" id="TileSet_3c4v5"]
+tile_size = Vector2i(64, 64)
+sources/1 = SubResource("TileSetAtlasSource_oqjvu")
+sources/0 = SubResource("TileSetAtlasSource_qb75w")
+sources/2 = SubResource("TileSetAtlasSource_h4n4s")
+
+[node name="TileMap" type="TileMap"]
+tile_set = SubResource("TileSet_3c4v5")
+format = 2
+layer_0/name = "base"
+layer_1/name = "mines"
+layer_1/tile_data = PackedInt32Array()
+layer_2/name = "numbers"
+layer_2/tile_data = PackedInt32Array()
+layer_3/name = "clickable"
+layer_3/tile_data = PackedInt32Array()
+layer_4/name = "flag"
+layer_4/tile_data = PackedInt32Array()
+script = ExtResource("3_7v0u1")
