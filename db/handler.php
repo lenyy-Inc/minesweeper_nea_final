@@ -219,7 +219,7 @@ if ($_SERVER["REQUEST_METHOD"] == "GET");
 			FROM demos
 			WHERE player1 = :username
 			OR player2 = :username
-			ORDER BY rowid
+			ORDER BY rowid DESC
 			LIMIT 10
 			OFFSET :offset"
 			);

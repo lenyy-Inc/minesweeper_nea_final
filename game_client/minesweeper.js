@@ -342,12 +342,6 @@ var HEAP,
   HEAPU32,
 /** @type {!Float32Array} */
   HEAPF32,
-/* BigInt64Array type is not correctly defined in closure
-/** not-@type {!BigInt64Array} */
-  HEAP64,
-/* BigUInt64Array type is not correctly defined in closure
-/** not-t@type {!BigUint64Array} */
-  HEAPU64,
 /** @type {!Float64Array} */
   HEAPF64;
 
@@ -361,8 +355,6 @@ function updateMemoryViews() {
   Module['HEAPU32'] = HEAPU32 = new Uint32Array(b);
   Module['HEAPF32'] = HEAPF32 = new Float32Array(b);
   Module['HEAPF64'] = HEAPF64 = new Float64Array(b);
-  Module['HEAP64'] = HEAP64 = new BigInt64Array(b);
-  Module['HEAPU64'] = HEAPU64 = new BigUint64Array(b);
 }
 
 assert(!Module['STACK_SIZE'], 'STACK_SIZE can no longer be set at runtime.  Use -sSTACK_SIZE at link time')
@@ -822,6 +814,10 @@ function createWasm() {
   return {}; // no exports yet; we'll fill them in later
 }
 
+// Globals used by JS i64 conversions (see makeSetValue)
+var tempDouble;
+var tempI64;
+
 // include: runtime_debug.js
 function legacyModuleProp(prop, newName, incomming=true) {
   if (!Object.getOwnPropertyDescriptor(Module, prop)) {
@@ -951,7 +947,7 @@ function dbg(text) {
       case 'i8': return HEAP8[((ptr)>>0)];
       case 'i16': return HEAP16[((ptr)>>1)];
       case 'i32': return HEAP32[((ptr)>>2)];
-      case 'i64': return HEAP64[((ptr)>>3)];
+      case 'i64': abort('to do getValue(i64) use WASM_BIGINT');
       case 'float': return HEAPF32[((ptr)>>2)];
       case 'double': return HEAPF64[((ptr)>>3)];
       case '*': return HEAPU32[((ptr)>>2)];
@@ -981,7 +977,7 @@ function dbg(text) {
       case 'i8': HEAP8[((ptr)>>0)] = value; break;
       case 'i16': HEAP16[((ptr)>>1)] = value; break;
       case 'i32': HEAP32[((ptr)>>2)] = value; break;
-      case 'i64': HEAP64[((ptr)>>3)] = BigInt(value); break;
+      case 'i64': abort('to do setValue(i64) use WASM_BIGINT');
       case 'float': HEAPF32[((ptr)>>2)] = value; break;
       case 'double': HEAPF64[((ptr)>>3)] = value; break;
       case '*': HEAPU32[((ptr)>>2)] = value; break;
@@ -4055,19 +4051,19 @@ function dbg(text) {
         HEAP32[(((buf)+(12))>>2)] = stat.uid;
         HEAP32[(((buf)+(16))>>2)] = stat.gid;
         HEAP32[(((buf)+(20))>>2)] = stat.rdev;
-        HEAP64[(((buf)+(24))>>3)] = BigInt(stat.size);
+        (tempI64 = [stat.size>>>0,(tempDouble = stat.size,(+(Math.abs(tempDouble))) >= 1.0 ? (tempDouble > 0.0 ? (+(Math.floor((tempDouble)/4294967296.0)))>>>0 : (~~((+(Math.ceil((tempDouble - +(((~~(tempDouble)))>>>0))/4294967296.0)))))>>>0) : 0)], HEAP32[(((buf)+(24))>>2)] = tempI64[0],HEAP32[(((buf)+(28))>>2)] = tempI64[1]);
         HEAP32[(((buf)+(32))>>2)] = 4096;
         HEAP32[(((buf)+(36))>>2)] = stat.blocks;
         var atime = stat.atime.getTime();
         var mtime = stat.mtime.getTime();
         var ctime = stat.ctime.getTime();
-        HEAP64[(((buf)+(40))>>3)] = BigInt(Math.floor(atime / 1000));
+        (tempI64 = [Math.floor(atime / 1000)>>>0,(tempDouble = Math.floor(atime / 1000),(+(Math.abs(tempDouble))) >= 1.0 ? (tempDouble > 0.0 ? (+(Math.floor((tempDouble)/4294967296.0)))>>>0 : (~~((+(Math.ceil((tempDouble - +(((~~(tempDouble)))>>>0))/4294967296.0)))))>>>0) : 0)], HEAP32[(((buf)+(40))>>2)] = tempI64[0],HEAP32[(((buf)+(44))>>2)] = tempI64[1]);
         HEAPU32[(((buf)+(48))>>2)] = (atime % 1000) * 1000;
-        HEAP64[(((buf)+(56))>>3)] = BigInt(Math.floor(mtime / 1000));
+        (tempI64 = [Math.floor(mtime / 1000)>>>0,(tempDouble = Math.floor(mtime / 1000),(+(Math.abs(tempDouble))) >= 1.0 ? (tempDouble > 0.0 ? (+(Math.floor((tempDouble)/4294967296.0)))>>>0 : (~~((+(Math.ceil((tempDouble - +(((~~(tempDouble)))>>>0))/4294967296.0)))))>>>0) : 0)], HEAP32[(((buf)+(56))>>2)] = tempI64[0],HEAP32[(((buf)+(60))>>2)] = tempI64[1]);
         HEAPU32[(((buf)+(64))>>2)] = (mtime % 1000) * 1000;
-        HEAP64[(((buf)+(72))>>3)] = BigInt(Math.floor(ctime / 1000));
+        (tempI64 = [Math.floor(ctime / 1000)>>>0,(tempDouble = Math.floor(ctime / 1000),(+(Math.abs(tempDouble))) >= 1.0 ? (tempDouble > 0.0 ? (+(Math.floor((tempDouble)/4294967296.0)))>>>0 : (~~((+(Math.ceil((tempDouble - +(((~~(tempDouble)))>>>0))/4294967296.0)))))>>>0) : 0)], HEAP32[(((buf)+(72))>>2)] = tempI64[0],HEAP32[(((buf)+(76))>>2)] = tempI64[1]);
         HEAPU32[(((buf)+(80))>>2)] = (ctime % 1000) * 1000;
-        HEAP64[(((buf)+(88))>>3)] = BigInt(stat.ino);
+        (tempI64 = [stat.ino>>>0,(tempDouble = stat.ino,(+(Math.abs(tempDouble))) >= 1.0 ? (tempDouble > 0.0 ? (+(Math.floor((tempDouble)/4294967296.0)))>>>0 : (~~((+(Math.ceil((tempDouble - +(((~~(tempDouble)))>>>0))/4294967296.0)))))>>>0) : 0)], HEAP32[(((buf)+(88))>>2)] = tempI64[0],HEAP32[(((buf)+(92))>>2)] = tempI64[1]);
         return 0;
       },
   doMsync(addr, stream, len, flags, offset) {
@@ -5310,8 +5306,8 @@ function dbg(text) {
                  8;                             // DT_REG, regular file.
         }
         assert(id);
-        HEAP64[((dirp + pos)>>3)] = BigInt(id);
-        HEAP64[(((dirp + pos)+(8))>>3)] = BigInt((idx + 1) * struct_size);
+        (tempI64 = [id>>>0,(tempDouble = id,(+(Math.abs(tempDouble))) >= 1.0 ? (tempDouble > 0.0 ? (+(Math.floor((tempDouble)/4294967296.0)))>>>0 : (~~((+(Math.ceil((tempDouble - +(((~~(tempDouble)))>>>0))/4294967296.0)))))>>>0) : 0)], HEAP32[((dirp + pos)>>2)] = tempI64[0],HEAP32[(((dirp + pos)+(4))>>2)] = tempI64[1]);
+        (tempI64 = [(idx + 1) * struct_size>>>0,(tempDouble = (idx + 1) * struct_size,(+(Math.abs(tempDouble))) >= 1.0 ? (tempDouble > 0.0 ? (+(Math.floor((tempDouble)/4294967296.0)))>>>0 : (~~((+(Math.ceil((tempDouble - +(((~~(tempDouble)))>>>0))/4294967296.0)))))>>>0) : 0)], HEAP32[(((dirp + pos)+(8))>>2)] = tempI64[0],HEAP32[(((dirp + pos)+(12))>>2)] = tempI64[1]);
         HEAP16[(((dirp + pos)+(16))>>1)] = 280;
         HEAP8[(((dirp + pos)+(18))>>0)] = type;
         stringToUTF8(name, dirp + pos + 19, 256);
@@ -5734,12 +5730,13 @@ function dbg(text) {
       throw Infinity;
     };
 
-  var MAX_INT53 = 9007199254740992;
-  
-  var MIN_INT53 = -9007199254740992;
-  var bigintToI53Checked = (num) => (num < MIN_INT53 || num > MAX_INT53) ? NaN : Number(num);
-  function __gmtime_js(time, tmPtr) {
-    time = bigintToI53Checked(time);;
+  var convertI32PairToI53Checked = (lo, hi) => {
+      assert(lo == (lo >>> 0) || lo == (lo|0)); // lo should either be a i32 or a u32
+      assert(hi === (hi|0));                    // hi should be a i32
+      return ((hi + 0x200000) >>> 0 < 0x400001 - !!lo) ? (lo >>> 0) + hi * 4294967296 : NaN;
+    };
+  function __gmtime_js(time_low, time_high,tmPtr) {
+    var time = convertI32PairToI53Checked(time_low, time_high);;
   
     
       var date = new Date(time * 1000);
@@ -5769,8 +5766,8 @@ function dbg(text) {
       return yday;
     };
   
-  function __localtime_js(time, tmPtr) {
-    time = bigintToI53Checked(time);;
+  function __localtime_js(time_low, time_high,tmPtr) {
+    var time = convertI32PairToI53Checked(time_low, time_high);;
   
     
       var date = new Date(time*1000);
@@ -7260,6 +7257,8 @@ function dbg(text) {
     };
 
 
+  var _emscripten_memcpy_js = (dest, src, num) => HEAPU8.copyWithin(dest, src, src + num);
+
   var getHeapMax = () =>
       // Stay one Wasm page short of 4GB: while e.g. Chrome is able to allocate
       // full 4GB Wasm memories, the size will wrap back to 0 bytes in Wasm side
@@ -7690,8 +7689,8 @@ function dbg(text) {
       }
       HEAP8[((pbuf)>>0)] = type;
       HEAP16[(((pbuf)+(2))>>1)] = flags;
-      HEAP64[(((pbuf)+(8))>>3)] = BigInt(rightsBase);
-      HEAP64[(((pbuf)+(16))>>3)] = BigInt(rightsInheriting);
+      (tempI64 = [rightsBase>>>0,(tempDouble = rightsBase,(+(Math.abs(tempDouble))) >= 1.0 ? (tempDouble > 0.0 ? (+(Math.floor((tempDouble)/4294967296.0)))>>>0 : (~~((+(Math.ceil((tempDouble - +(((~~(tempDouble)))>>>0))/4294967296.0)))))>>>0) : 0)], HEAP32[(((pbuf)+(8))>>2)] = tempI64[0],HEAP32[(((pbuf)+(12))>>2)] = tempI64[1]);
+      (tempI64 = [rightsInheriting>>>0,(tempDouble = rightsInheriting,(+(Math.abs(tempDouble))) >= 1.0 ? (tempDouble > 0.0 ? (+(Math.floor((tempDouble)/4294967296.0)))>>>0 : (~~((+(Math.ceil((tempDouble - +(((~~(tempDouble)))>>>0))/4294967296.0)))))>>>0) : 0)], HEAP32[(((pbuf)+(16))>>2)] = tempI64[0],HEAP32[(((pbuf)+(20))>>2)] = tempI64[1]);
       return 0;
     } catch (e) {
     if (typeof FS == 'undefined' || !(e.name === 'ErrnoError')) throw e;
@@ -7731,8 +7730,8 @@ function dbg(text) {
   }
 
   
-  function _fd_seek(fd, offset, whence, newOffset) {
-    offset = bigintToI53Checked(offset);;
+  function _fd_seek(fd,offset_low, offset_high,whence,newOffset) {
+    var offset = convertI32PairToI53Checked(offset_low, offset_high);;
   
     
   try {
@@ -7740,7 +7739,7 @@ function dbg(text) {
       if (isNaN(offset)) return 61;
       var stream = SYSCALLS.getStreamFromFD(fd);
       FS.llseek(stream, offset, whence);
-      HEAP64[((newOffset)>>3)] = BigInt(stream.position);
+      (tempI64 = [stream.position>>>0,(tempDouble = stream.position,(+(Math.abs(tempDouble))) >= 1.0 ? (tempDouble > 0.0 ? (+(Math.floor((tempDouble)/4294967296.0)))>>>0 : (~~((+(Math.ceil((tempDouble - +(((~~(tempDouble)))>>>0))/4294967296.0)))))>>>0) : 0)], HEAP32[((newOffset)>>2)] = tempI64[0],HEAP32[(((newOffset)+(4))>>2)] = tempI64[1]);
       if (stream.getdents && offset === 0 && whence === 0) stream.getdents = null; // reset readdir state
       return 0;
     } catch (e) {
@@ -12745,11 +12744,9 @@ function dbg(text) {
   					// callback don't bubble up here and cause Godot to try the
   					// next reference space.
   					window.setTimeout(function () {
-  						const reference_space_c_str = GodotRuntime.allocString(reference_space_type);
-  						const enabled_features_c_str = GodotRuntime.allocString(Array.from(session.enabledFeatures).join(','));
-  						onstarted(reference_space_c_str, enabled_features_c_str);
-  						GodotRuntime.free(reference_space_c_str);
-  						GodotRuntime.free(enabled_features_c_str);
+  						const c_str = GodotRuntime.allocString(reference_space_type);
+  						onstarted(c_str);
+  						GodotRuntime.free(c_str);
   					}, 0);
   				}
   
@@ -12827,7 +12824,7 @@ function dbg(text) {
   		GodotWebXR.pauseResumeMainLoop();
   	};
 
-  function _godot_webxr_update_input_source(p_input_source_id, r_target_pose, r_target_ray_mode, r_touch_index, r_has_grip_pose, r_grip_pose, r_has_standard_mapping, r_button_count, r_buttons, r_axes_count, r_axes, r_has_hand_data, r_hand_joints, r_hand_radii) {
+  function _godot_webxr_update_input_source(p_input_source_id, r_target_pose, r_target_ray_mode, r_touch_index, r_has_grip_pose, r_grip_pose, r_has_standard_mapping, r_button_count, r_buttons, r_axes_count, r_axes) {
   		if (!GodotWebXR.session || !GodotWebXR.frame) {
   			return 0;
   		}
@@ -12909,19 +12906,6 @@ function dbg(text) {
   		GodotRuntime.setHeapValue(r_has_standard_mapping, has_standard_mapping ? 1 : 0, 'i32');
   		GodotRuntime.setHeapValue(r_button_count, button_count, 'i32');
   		GodotRuntime.setHeapValue(r_axes_count, axes_count, 'i32');
-  
-  		// Hand tracking data.
-  		let has_hand_data = false;
-  		if (input_source.hand && r_hand_joints !== 0 && r_hand_radii !== 0) {
-  			const hand_joint_array = new Float32Array(25 * 16);
-  			const hand_radii_array = new Float32Array(25);
-  			if (frame.fillPoses(input_source.hand.values(), space, hand_joint_array) && frame.fillJointRadii(input_source.hand.values(), hand_radii_array)) {
-  				GodotRuntime.heapCopy(HEAPF32, hand_joint_array, r_hand_joints);
-  				GodotRuntime.heapCopy(HEAPF32, hand_radii_array, r_hand_radii);
-  				has_hand_data = true;
-  			}
-  		}
-  		GodotRuntime.setHeapValue(r_has_hand_data, has_hand_data ? 1 : 0, 'i32');
   
   		return true;
   	}
@@ -13507,6 +13491,8 @@ var wasmImports = {
   /** @export */
   emscripten_get_now: _emscripten_get_now,
   /** @export */
+  emscripten_memcpy_js: _emscripten_memcpy_js,
+  /** @export */
   emscripten_resize_heap: _emscripten_resize_heap,
   /** @export */
   emscripten_set_canvas_element_size: _emscripten_set_canvas_element_size,
@@ -14090,6 +14076,7 @@ var __emwebxr_on_simple_event = Module['__emwebxr_on_simple_event'] = createExpo
 var ___funcs_on_exit = createExportWrapper('__funcs_on_exit');
 var __emscripten_timeout = createExportWrapper('_emscripten_timeout');
 var _setThrew = createExportWrapper('setThrew');
+var setTempRet0 = createExportWrapper('setTempRet0');
 var _emscripten_stack_init = () => (_emscripten_stack_init = wasmExports['emscripten_stack_init'])();
 var _emscripten_stack_get_free = () => (_emscripten_stack_get_free = wasmExports['emscripten_stack_get_free'])();
 var _emscripten_stack_get_base = () => (_emscripten_stack_get_base = wasmExports['emscripten_stack_get_base'])();
@@ -14100,6 +14087,175 @@ var stackAlloc = createExportWrapper('stackAlloc');
 var _emscripten_stack_get_current = () => (_emscripten_stack_get_current = wasmExports['emscripten_stack_get_current'])();
 var ___cxa_increment_exception_refcount = createExportWrapper('__cxa_increment_exception_refcount');
 var ___cxa_is_pointer_type = createExportWrapper('__cxa_is_pointer_type');
+var dynCall_viiiiji = Module['dynCall_viiiiji'] = createExportWrapper('dynCall_viiiiji');
+var dynCall_viiiiij = Module['dynCall_viiiiij'] = createExportWrapper('dynCall_viiiiij');
+var dynCall_viiiij = Module['dynCall_viiiij'] = createExportWrapper('dynCall_viiiij');
+var dynCall_viji = Module['dynCall_viji'] = createExportWrapper('dynCall_viji');
+var dynCall_vijii = Module['dynCall_vijii'] = createExportWrapper('dynCall_vijii');
+var dynCall_vijiii = Module['dynCall_vijiii'] = createExportWrapper('dynCall_vijiii');
+var dynCall_ji = Module['dynCall_ji'] = createExportWrapper('dynCall_ji');
+var dynCall_viiijii = Module['dynCall_viiijii'] = createExportWrapper('dynCall_viiijii');
+var dynCall_jij = Module['dynCall_jij'] = createExportWrapper('dynCall_jij');
+var dynCall_iiij = Module['dynCall_iiij'] = createExportWrapper('dynCall_iiij');
+var dynCall_iij = Module['dynCall_iij'] = createExportWrapper('dynCall_iij');
+var dynCall_viij = Module['dynCall_viij'] = createExportWrapper('dynCall_viij');
+var dynCall_jiij = Module['dynCall_jiij'] = createExportWrapper('dynCall_jiij');
+var dynCall_jiii = Module['dynCall_jiii'] = createExportWrapper('dynCall_jiii');
+var dynCall_jiiiiiii = Module['dynCall_jiiiiiii'] = createExportWrapper('dynCall_jiiiiiii');
+var dynCall_jiiiii = Module['dynCall_jiiiii'] = createExportWrapper('dynCall_jiiiii');
+var dynCall_ij = Module['dynCall_ij'] = createExportWrapper('dynCall_ij');
+var dynCall_vij = Module['dynCall_vij'] = createExportWrapper('dynCall_vij');
+var dynCall_jiiiiiiiiii = Module['dynCall_jiiiiiiiiii'] = createExportWrapper('dynCall_jiiiiiiiiii');
+var dynCall_jiiiiii = Module['dynCall_jiiiiii'] = createExportWrapper('dynCall_jiiiiii');
+var dynCall_jiiiiiiii = Module['dynCall_jiiiiiiii'] = createExportWrapper('dynCall_jiiiiiiii');
+var dynCall_jii = Module['dynCall_jii'] = createExportWrapper('dynCall_jii');
+var dynCall_iiiij = Module['dynCall_iiiij'] = createExportWrapper('dynCall_iiiij');
+var dynCall_viiij = Module['dynCall_viiij'] = createExportWrapper('dynCall_viiij');
+var dynCall_viiiiiiij = Module['dynCall_viiiiiiij'] = createExportWrapper('dynCall_viiiiiiij');
+var dynCall_jiji = Module['dynCall_jiji'] = createExportWrapper('dynCall_jiji');
+var dynCall_jiiifi = Module['dynCall_jiiifi'] = createExportWrapper('dynCall_jiiifi');
+var dynCall_jiiifiiiii = Module['dynCall_jiiifiiiii'] = createExportWrapper('dynCall_jiiifiiiii');
+var dynCall_jiifff = Module['dynCall_jiifff'] = createExportWrapper('dynCall_jiifff');
+var dynCall_vijf = Module['dynCall_vijf'] = createExportWrapper('dynCall_vijf');
+var dynCall_viiiiifiijii = Module['dynCall_viiiiifiijii'] = createExportWrapper('dynCall_viiiiifiijii');
+var dynCall_viiiiifiiijjii = Module['dynCall_viiiiifiiijjii'] = createExportWrapper('dynCall_viiiiifiiijjii');
+var dynCall_viiiiifiiijii = Module['dynCall_viiiiifiiijii'] = createExportWrapper('dynCall_viiiiifiiijii');
+var dynCall_viiiiifiiiijjii = Module['dynCall_viiiiifiiiijjii'] = createExportWrapper('dynCall_viiiiifiiiijjii');
+var dynCall_vijiiii = Module['dynCall_vijiiii'] = createExportWrapper('dynCall_vijiiii');
+var dynCall_viijiiiiiiiii = Module['dynCall_viijiiiiiiiii'] = createExportWrapper('dynCall_viijiiiiiiiii');
+var dynCall_viiiiiji = Module['dynCall_viiiiiji'] = createExportWrapper('dynCall_viiiiiji');
+var dynCall_vijj = Module['dynCall_vijj'] = createExportWrapper('dynCall_vijj');
+var dynCall_jijiiiiifiii = Module['dynCall_jijiiiiifiii'] = createExportWrapper('dynCall_jijiiiiifiii');
+var dynCall_iijiiij = Module['dynCall_iijiiij'] = createExportWrapper('dynCall_iijiiij');
+var dynCall_iijiij = Module['dynCall_iijiij'] = createExportWrapper('dynCall_iijiij');
+var dynCall_iijjiiiiiiij = Module['dynCall_iijjiiiiiiij'] = createExportWrapper('dynCall_iijjiiiiiiij');
+var dynCall_iijiiiiij = Module['dynCall_iijiiiiij'] = createExportWrapper('dynCall_iijiiiiij');
+var dynCall_iijjj = Module['dynCall_iijjj'] = createExportWrapper('dynCall_iijjj');
+var dynCall_vijiiiiiidddd = Module['dynCall_vijiiiiiidddd'] = createExportWrapper('dynCall_vijiiiiiidddd');
+var dynCall_jiiii = Module['dynCall_jiiii'] = createExportWrapper('dynCall_jiiii');
+var dynCall_jiijiiii = Module['dynCall_jiijiiii'] = createExportWrapper('dynCall_jiijiiii');
+var dynCall_jiiiijjjjjj = Module['dynCall_jiiiijjjjjj'] = createExportWrapper('dynCall_jiiiijjjjjj');
+var dynCall_iijii = Module['dynCall_iijii'] = createExportWrapper('dynCall_iijii');
+var dynCall_viiji = Module['dynCall_viiji'] = createExportWrapper('dynCall_viiji');
+var dynCall_iijjiiiiiii = Module['dynCall_iijjiiiiiii'] = createExportWrapper('dynCall_iijjiiiiiii');
+var dynCall_iijiiiii = Module['dynCall_iijiiiii'] = createExportWrapper('dynCall_iijiiiii');
+var dynCall_iijj = Module['dynCall_iijj'] = createExportWrapper('dynCall_iijj');
+var dynCall_iiji = Module['dynCall_iiji'] = createExportWrapper('dynCall_iiji');
+var dynCall_jiiji = Module['dynCall_jiiji'] = createExportWrapper('dynCall_jiiji');
+var dynCall_jiiiji = Module['dynCall_jiiiji'] = createExportWrapper('dynCall_jiiiji');
+var dynCall_jiiij = Module['dynCall_jiiij'] = createExportWrapper('dynCall_jiiij');
+var dynCall_jiijii = Module['dynCall_jiijii'] = createExportWrapper('dynCall_jiijii');
+var dynCall_jijii = Module['dynCall_jijii'] = createExportWrapper('dynCall_jijii');
+var dynCall_iijjiii = Module['dynCall_iijjiii'] = createExportWrapper('dynCall_iijjiii');
+var dynCall_iijiii = Module['dynCall_iijiii'] = createExportWrapper('dynCall_iijiii');
+var dynCall_viijii = Module['dynCall_viijii'] = createExportWrapper('dynCall_viijii');
+var dynCall_jijjjiiiiijii = Module['dynCall_jijjjiiiiijii'] = createExportWrapper('dynCall_jijjjiiiiijii');
+var dynCall_jijiiiiifii = Module['dynCall_jijiiiiifii'] = createExportWrapper('dynCall_jijiiiiifii');
+var dynCall_viijiiiiiifiii = Module['dynCall_viijiiiiiifiii'] = createExportWrapper('dynCall_viijiiiiiifiii');
+var dynCall_vijji = Module['dynCall_vijji'] = createExportWrapper('dynCall_vijji');
+var dynCall_jiijj = Module['dynCall_jiijj'] = createExportWrapper('dynCall_jiijj');
+var dynCall_vijjii = Module['dynCall_vijjii'] = createExportWrapper('dynCall_vijjii');
+var dynCall_fij = Module['dynCall_fij'] = createExportWrapper('dynCall_fij');
+var dynCall_vijiffifff = Module['dynCall_vijiffifff'] = createExportWrapper('dynCall_vijiffifff');
+var dynCall_vijff = Module['dynCall_vijff'] = createExportWrapper('dynCall_vijff');
+var dynCall_vijiffff = Module['dynCall_vijiffff'] = createExportWrapper('dynCall_vijiffff');
+var dynCall_vijjf = Module['dynCall_vijjf'] = createExportWrapper('dynCall_vijjf');
+var dynCall_vijij = Module['dynCall_vijij'] = createExportWrapper('dynCall_vijij');
+var dynCall_vijif = Module['dynCall_vijif'] = createExportWrapper('dynCall_vijif');
+var dynCall_vijiiifi = Module['dynCall_vijiiifi'] = createExportWrapper('dynCall_vijiiifi');
+var dynCall_vijiifi = Module['dynCall_vijiifi'] = createExportWrapper('dynCall_vijiifi');
+var dynCall_vijiif = Module['dynCall_vijiif'] = createExportWrapper('dynCall_vijiif');
+var dynCall_vijifi = Module['dynCall_vijifi'] = createExportWrapper('dynCall_vijifi');
+var dynCall_vijijiii = Module['dynCall_vijijiii'] = createExportWrapper('dynCall_vijijiii');
+var dynCall_vijijiiii = Module['dynCall_vijijiiii'] = createExportWrapper('dynCall_vijijiiii');
+var dynCall_vijijiiiff = Module['dynCall_vijijiiiff'] = createExportWrapper('dynCall_vijijiiiff');
+var dynCall_vijijii = Module['dynCall_vijijii'] = createExportWrapper('dynCall_vijijii');
+var dynCall_vijiijiiiiii = Module['dynCall_vijiijiiiiii'] = createExportWrapper('dynCall_vijiijiiiiii');
+var dynCall_vijiiij = Module['dynCall_vijiiij'] = createExportWrapper('dynCall_vijiiij');
+var dynCall_vijiiiiiiji = Module['dynCall_vijiiiiiiji'] = createExportWrapper('dynCall_vijiiiiiiji');
+var dynCall_vijjj = Module['dynCall_vijjj'] = createExportWrapper('dynCall_vijjj');
+var dynCall_vijdddd = Module['dynCall_vijdddd'] = createExportWrapper('dynCall_vijdddd');
+var dynCall_vijififi = Module['dynCall_vijififi'] = createExportWrapper('dynCall_vijififi');
+var dynCall_iijji = Module['dynCall_iijji'] = createExportWrapper('dynCall_iijji');
+var dynCall_viijj = Module['dynCall_viijj'] = createExportWrapper('dynCall_viijj');
+var dynCall_dij = Module['dynCall_dij'] = createExportWrapper('dynCall_dij');
+var dynCall_vijd = Module['dynCall_vijd'] = createExportWrapper('dynCall_vijd');
+var dynCall_viijiiii = Module['dynCall_viijiiii'] = createExportWrapper('dynCall_viijiiii');
+var dynCall_viijiii = Module['dynCall_viijiii'] = createExportWrapper('dynCall_viijiii');
+var dynCall_iiiijf = Module['dynCall_iiiijf'] = createExportWrapper('dynCall_iiiijf');
+var dynCall_vijiiiii = Module['dynCall_vijiiiii'] = createExportWrapper('dynCall_vijiiiii');
+var dynCall_viijd = Module['dynCall_viijd'] = createExportWrapper('dynCall_viijd');
+var dynCall_diij = Module['dynCall_diij'] = createExportWrapper('dynCall_diij');
+var dynCall_viiiji = Module['dynCall_viiiji'] = createExportWrapper('dynCall_viiiji');
+var dynCall_viiijj = Module['dynCall_viiijj'] = createExportWrapper('dynCall_viiijj');
+var dynCall_viijji = Module['dynCall_viijji'] = createExportWrapper('dynCall_viijji');
+var dynCall_jiijjj = Module['dynCall_jiijjj'] = createExportWrapper('dynCall_jiijjj');
+var dynCall_viiijiji = Module['dynCall_viiijiji'] = createExportWrapper('dynCall_viiijiji');
+var dynCall_viiijjiji = Module['dynCall_viiijjiji'] = createExportWrapper('dynCall_viiijjiji');
+var dynCall_viijiji = Module['dynCall_viijiji'] = createExportWrapper('dynCall_viijiji');
+var dynCall_iiiiijiii = Module['dynCall_iiiiijiii'] = createExportWrapper('dynCall_iiiiijiii');
+var dynCall_iiiiiijd = Module['dynCall_iiiiiijd'] = createExportWrapper('dynCall_iiiiiijd');
+var dynCall_diidj = Module['dynCall_diidj'] = createExportWrapper('dynCall_diidj');
+var dynCall_viiiijij = Module['dynCall_viiiijij'] = createExportWrapper('dynCall_viiiijij');
+var dynCall_viiidjj = Module['dynCall_viiidjj'] = createExportWrapper('dynCall_viiidjj');
+var dynCall_viidj = Module['dynCall_viidj'] = createExportWrapper('dynCall_viidj');
+var dynCall_iiijj = Module['dynCall_iiijj'] = createExportWrapper('dynCall_iiijj');
+var dynCall_jiid = Module['dynCall_jiid'] = createExportWrapper('dynCall_jiid');
+var dynCall_viiiiddji = Module['dynCall_viiiiddji'] = createExportWrapper('dynCall_viiiiddji');
+var dynCall_vijiiiiiiiiii = Module['dynCall_vijiiiiiiiiii'] = createExportWrapper('dynCall_vijiiiiiiiiii');
+var dynCall_vijiiiffi = Module['dynCall_vijiiiffi'] = createExportWrapper('dynCall_vijiiiffi');
+var dynCall_vijiiifii = Module['dynCall_vijiiifii'] = createExportWrapper('dynCall_vijiiifii');
+var dynCall_viijfii = Module['dynCall_viijfii'] = createExportWrapper('dynCall_viijfii');
+var dynCall_viiiiiiiiiiijjjjjjifiiiiii = Module['dynCall_viiiiiiiiiiijjjjjjifiiiiii'] = createExportWrapper('dynCall_viiiiiiiiiiijjjjjjifiiiiii');
+var dynCall_vijifff = Module['dynCall_vijifff'] = createExportWrapper('dynCall_vijifff');
+var dynCall_fiji = Module['dynCall_fiji'] = createExportWrapper('dynCall_fiji');
+var dynCall_vijiiffifffi = Module['dynCall_vijiiffifffi'] = createExportWrapper('dynCall_vijiiffifffi');
+var dynCall_iijjfj = Module['dynCall_iijjfj'] = createExportWrapper('dynCall_iijjfj');
+var dynCall_vijiji = Module['dynCall_vijiji'] = createExportWrapper('dynCall_vijiji');
+var dynCall_vijid = Module['dynCall_vijid'] = createExportWrapper('dynCall_vijid');
+var dynCall_vijiiiiii = Module['dynCall_vijiiiiii'] = createExportWrapper('dynCall_vijiiiiii');
+var dynCall_vijiff = Module['dynCall_vijiff'] = createExportWrapper('dynCall_vijiff');
+var dynCall_vijjjj = Module['dynCall_vijjjj'] = createExportWrapper('dynCall_vijjjj');
+var dynCall_vijiiiiiii = Module['dynCall_vijiiiiiii'] = createExportWrapper('dynCall_vijiiiiiii');
+var dynCall_jiiifiiiiif = Module['dynCall_jiiifiiiiif'] = createExportWrapper('dynCall_jiiifiiiiif');
+var dynCall_viiiifijii = Module['dynCall_viiiifijii'] = createExportWrapper('dynCall_viiiifijii');
+var dynCall_viiiifiijjii = Module['dynCall_viiiifiijjii'] = createExportWrapper('dynCall_viiiifiijjii');
+var dynCall_vijiiifiijii = Module['dynCall_vijiiifiijii'] = createExportWrapper('dynCall_vijiiifiijii');
+var dynCall_vijiiifiiijjii = Module['dynCall_vijiiifiiijjii'] = createExportWrapper('dynCall_vijiiifiiijjii');
+var dynCall_vijiiifiiijii = Module['dynCall_vijiiifiiijii'] = createExportWrapper('dynCall_vijiiifiiijii');
+var dynCall_vijiiifiiiijjii = Module['dynCall_vijiiifiiiijjii'] = createExportWrapper('dynCall_vijiiifiiiijjii');
+var dynCall_fijiiii = Module['dynCall_fijiiii'] = createExportWrapper('dynCall_fijiiii');
+var dynCall_fijiiiii = Module['dynCall_fijiiiii'] = createExportWrapper('dynCall_fijiiiii');
+var dynCall_iijiijiiiii = Module['dynCall_iijiijiiiii'] = createExportWrapper('dynCall_iijiijiiiii');
+var dynCall_iijijiiiii = Module['dynCall_iijijiiiii'] = createExportWrapper('dynCall_iijijiiiii');
+var dynCall_vijijj = Module['dynCall_vijijj'] = createExportWrapper('dynCall_vijijj');
+var dynCall_vijiiijj = Module['dynCall_vijiiijj'] = createExportWrapper('dynCall_vijiiijj');
+var dynCall_vijiijj = Module['dynCall_vijiijj'] = createExportWrapper('dynCall_vijiijj');
+var dynCall_vijjiji = Module['dynCall_vijjiji'] = createExportWrapper('dynCall_vijjiji');
+var dynCall_vijjiijii = Module['dynCall_vijjiijii'] = createExportWrapper('dynCall_vijjiijii');
+var dynCall_fijii = Module['dynCall_fijii'] = createExportWrapper('dynCall_fijii');
+var dynCall_iiiiiiij = Module['dynCall_iiiiiiij'] = createExportWrapper('dynCall_iiiiiiij');
+var dynCall_vijiiiij = Module['dynCall_vijiiiij'] = createExportWrapper('dynCall_vijiiiij');
+var dynCall_jijj = Module['dynCall_jijj'] = createExportWrapper('dynCall_jijj');
+var dynCall_jiiif = Module['dynCall_jiiif'] = createExportWrapper('dynCall_jiiif');
+var dynCall_vijfff = Module['dynCall_vijfff'] = createExportWrapper('dynCall_vijfff');
+var dynCall_vijfiff = Module['dynCall_vijfiff'] = createExportWrapper('dynCall_vijfiff');
+var dynCall_vijiiffi = Module['dynCall_vijiiffi'] = createExportWrapper('dynCall_vijiiffi');
+var dynCall_vijiiffffiffffj = Module['dynCall_vijiiffffiffffj'] = createExportWrapper('dynCall_vijiiffffiffffj');
+var dynCall_vijifffij = Module['dynCall_vijifffij'] = createExportWrapper('dynCall_vijifffij');
+var dynCall_vijiifff = Module['dynCall_vijiifff'] = createExportWrapper('dynCall_vijiifff');
+var dynCall_vijiffffffff = Module['dynCall_vijiffffffff'] = createExportWrapper('dynCall_vijiffffffff');
+var dynCall_vijiifiififff = Module['dynCall_vijiifiififff'] = createExportWrapper('dynCall_vijiifiififff');
+var dynCall_vijiifffffff = Module['dynCall_vijiifffffff'] = createExportWrapper('dynCall_vijiifffffff');
+var dynCall_vijifiifffffifff = Module['dynCall_vijifiifffffifff'] = createExportWrapper('dynCall_vijifiifffffifff');
+var dynCall_vijfi = Module['dynCall_vijfi'] = createExportWrapper('dynCall_vijfi');
+var dynCall_vijffffi = Module['dynCall_vijffffi'] = createExportWrapper('dynCall_vijffffi');
+var dynCall_viijjjiifjii = Module['dynCall_viijjjiifjii'] = createExportWrapper('dynCall_viijjjiifjii');
+var dynCall_vijjjii = Module['dynCall_vijjjii'] = createExportWrapper('dynCall_vijjjii');
+var dynCall_fijj = Module['dynCall_fijj'] = createExportWrapper('dynCall_fijj');
+var dynCall_iiiiij = Module['dynCall_iiiiij'] = createExportWrapper('dynCall_iiiiij');
+var dynCall_iiiiijj = Module['dynCall_iiiiijj'] = createExportWrapper('dynCall_iiiiijj');
+var dynCall_iiiiiijj = Module['dynCall_iiiiiijj'] = createExportWrapper('dynCall_iiiiiijj');
 
 function invoke_vii(index,a1,a2) {
   var sp = stackSave();
@@ -14167,17 +14323,6 @@ function invoke_viiii(index,a1,a2,a3,a4) {
   }
 }
 
-function invoke_viiij(index,a1,a2,a3,a4) {
-  var sp = stackSave();
-  try {
-    getWasmTableEntry(index)(a1,a2,a3,a4);
-  } catch(e) {
-    stackRestore(sp);
-    if (e !== e+0) throw e;
-    _setThrew(1, 0);
-  }
-}
-
 function invoke_iii(index,a1,a2) {
   var sp = stackSave();
   try {
@@ -14222,6 +14367,17 @@ function invoke_viii(index,a1,a2,a3) {
   }
 }
 
+function invoke_viiij(index,a1,a2,a3,a4,a5) {
+  var sp = stackSave();
+  try {
+    dynCall_viiij(index,a1,a2,a3,a4,a5);
+  } catch(e) {
+    stackRestore(sp);
+    if (e !== e+0) throw e;
+    _setThrew(1, 0);
+  }
+}
+
 
 // include: postamble.js
 // === Auto-generated postamble setup entry stuff ===
@@ -14234,7 +14390,6 @@ var missingLibrarySymbols = [
   'writeI53ToU64Clamped',
   'writeI53ToU64Signaling',
   'convertI32PairToI53',
-  'convertI32PairToI53Checked',
   'convertU32PairToI53',
   'getCallstack',
   'emscriptenLog',
@@ -14242,6 +14397,7 @@ var missingLibrarySymbols = [
   'readEmAsmArgs',
   'listenOnce',
   'autoResumeAudioContext',
+  'dynCallLegacy',
   'getDynCaller',
   'dynCall',
   'asmjsMangle',
@@ -14381,9 +14537,7 @@ var unexportedSymbols = [
   'writeI53ToI64',
   'readI53FromI64',
   'readI53FromU64',
-  'MAX_INT53',
-  'MIN_INT53',
-  'bigintToI53Checked',
+  'convertI32PairToI53Checked',
   'ptrToString',
   'zeroMemory',
   'exitJS',
@@ -15453,7 +15607,9 @@ const Engine = (function () {
 							preloader.preloadedFiles.length = 0; // Clear memory
 							me.rtenv['callMain'](me.config.args);
 							initPromise = null;
-							me.installServiceWorker();
+							if (me.config.serviceWorker && 'serviceWorker' in navigator) {
+								navigator.serviceWorker.register(me.config.serviceWorker);
+							}
 							resolve();
 						});
 					});
@@ -15514,17 +15670,6 @@ const Engine = (function () {
 					this.rtenv['request_quit']();
 				}
 			},
-
-			/**
-			 * Install the progressive-web app service worker.
-			 * @returns {Promise} The service worker registration promise.
-			 */
-			installServiceWorker: function () {
-				if (this.config.serviceWorker && 'serviceWorker' in navigator) {
-					return navigator.serviceWorker.register(this.config.serviceWorker);
-				}
-				return Promise.resolve();
-			},
 		};
 
 		Engine.prototype = proto;
@@ -15535,7 +15680,6 @@ const Engine = (function () {
 		Engine.prototype['startGame'] = Engine.prototype.startGame;
 		Engine.prototype['copyToFS'] = Engine.prototype.copyToFS;
 		Engine.prototype['requestQuit'] = Engine.prototype.requestQuit;
-		Engine.prototype['installServiceWorker'] = Engine.prototype.installServiceWorker;
 		// Also expose static methods as instance methods
 		Engine.prototype['load'] = Engine.load;
 		Engine.prototype['unload'] = Engine.unload;
